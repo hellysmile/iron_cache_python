@@ -1,10 +1,13 @@
+import six
 import iron_core
-import urllib
 try:
     import json
 except:
     import simplejson as json
-
+try:
+    from urllib.parse import quote_plus, urlencode
+except ImportError:  # Python 2
+    from urllib import quote_plus, urlencode
 
 class Item:
     cache = None
@@ -69,7 +72,7 @@ class IronCache:
                    http://dev.iron.io/cache/reference/api/#list_caches for more
                    information on defaults and possible values.
         """
-        query = urllib.urlencode(options)
+        query = urlencode(options)
         url = "caches"
         if query != "":
             url = "%s?%s" % (url, query)
@@ -89,8 +92,8 @@ class IronCache:
             cache = self.name
         if cache is None:
             raise ValueError("Cache name must be set")
-        cache = urllib.quote_plus(cache)
-        key = urllib.quote_plus(key)
+        cache = quote_plus(cache)
+        key = quote_plus(key)
         url = "caches/%s/items/%s" % (cache, key)
         result = self.client.get(url)
         return Item(values=result["body"])
@@ -114,15 +117,15 @@ class IronCache:
         if cache is None:
             raise ValueError("Cache name must be set")
 
-        if not isinstance(value, basestring) and not isinstance(value,
-                (int, long)):
+        if not isinstance(value, six.string_types) and not isinstance(value,
+                six.integer_types):
             value = json.dumps(value)
 
         options["body"] = value
         body = json.dumps(options)
 
-        cache = urllib.quote_plus(cache)
-        key = urllib.quote_plus(key)
+        cache = quote_plus(cache)
+        key = quote_plus(key)
 
         result = self.client.put("caches/%s/items/%s" % (cache, key), body,
                 {"Content-Type": "application/json"})
@@ -141,8 +144,8 @@ class IronCache:
             cache = self.name
         if cache is None:
             raise ValueError("Cache name must be set")
-        cache = urllib.quote_plus(cache)
-        key = urllib.quote_plus(key)
+        cache = quote_plus(cache)
+        key = quote_plus(key)
 
         self.client.delete("caches/%s/items/%s" % (cache, key))
 
@@ -163,8 +166,8 @@ class IronCache:
             cache = self.name
         if cache is None:
             raise ValueError("Cache name must be set")
-        cache = urllib.quote_plus(cache)
-        key = urllib.quote_plus(key)
+        cache = quote_plus(cache)
+        key = quote_plus(key)
 
         body = json.dumps({"amount": amount})
 
